@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
+import java.util.Optional;
 
 import com.ssf.day21lecture.model.Book;
 
@@ -67,19 +68,10 @@ public class BookRepo {
         return books;
     }
 
-    public Book getBook(String id) {
+    public Optional<Book> getBook(String id) {
         SqlRowSet rs = template.queryForRowSet(Queries.SQL_GET_BOOK_BY_ID, id);
-        Book book = new Book();
-        while (rs.next()) {
-            String title = rs.getString("title");
-            String authors = rs.getString("authors");
-            String description = rs.getString("description");
-            float rating = rs.getFloat("rating");
-            book.setTitle(title);
-            book.setAuthors(authors);
-            book.setDescription(description);
-            book.setRating(rating);
-        }
-        return book;
+        if (rs.first())
+            return Optional.of(Book.populate(rs));
+        return Optional.empty();
     }
 }
